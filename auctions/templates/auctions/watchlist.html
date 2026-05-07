@@ -1,0 +1,48 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h2>Watchlist</h2>
+
+{% for listing in listings %}
+<div class="card mb-3">
+    <div class="row no-gutters">
+        <div class="col-md-4">
+            {% if listing.image_url %}
+            <img src="{{ listing.image_url }}" class="card-img" alt="{{ listing.title }}"
+                style="max-height: 200px; object-fit: contain;">
+            {% else %}
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg" class="card-img"
+                alt="No Image" style="max-height: 200px; object-fit: contain;">
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title"><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h5>
+                <p class="card-text">{{ listing.description }}</p>
+                <p class="card-text">
+                    <b>Price:</b> ${{ listing.start_price }}
+                </p>
+                {% if listing.category %}
+                <p class="card-text">
+                    <small class="text-muted">
+                        Category: {{ listing.category }}
+                    </small>
+                </p>
+                {% endif %}
+                <p class="card-text">
+                    <small class="text-muted">
+                        Created: {{ listing.created_at }}
+                    </small>
+                </p>
+                <form action="{% url 'toggle_watchlist' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-warning btn-sm">Remove from Watchlist</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<p>Your watchlist is empty.</p>
+{% endfor %}
+{% endblock %}
