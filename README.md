@@ -81,3 +81,29 @@ npm run build
 ```
 
 That produces assets in `frontend/dist/`. Integrating those assets into Django can be handled later if you want a single deployed app, but it is intentionally left simple for local development.
+
+## Docker deployment (VPS)
+
+This repo now includes:
+
+- `Dockerfile` for Django backend (Gunicorn + migrations + collectstatic on startup)
+- `frontend/Dockerfile` for React build + Nginx runtime
+- `docker-compose.yml` for orchestrating both services
+
+Run on your VPS:
+
+```bash
+cp .env.example .env
+docker compose up -d --build
+```
+
+Access:
+
+- App: `http://<your-vps-ip-or-domain>/`
+- Django admin: `http://<your-vps-ip-or-domain>/admin/`
+
+Stop services:
+
+```bash
+docker compose down
+```
