@@ -1,3 +1,4 @@
+import { Moon, Sun } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import { logoutUser } from "../api/client";
@@ -6,7 +7,7 @@ function navClassName({ isActive }) {
   return `nav-link${isActive ? " nav-link-active" : ""}`;
 }
 
-export default function Navbar({ currentUser, onLoggedOut }) {
+export default function Navbar({ currentUser, onLoggedOut, theme, onThemeToggle }) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -56,8 +57,17 @@ export default function Navbar({ currentUser, onLoggedOut }) {
             {currentUser ? `Signed in as ${currentUser.username}` : "Browsing as guest"}
           </span>
           <div className="session-links">
+            <button
+              aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+              className="theme-toggle"
+              onClick={onThemeToggle}
+              type="button"
+            >
+              {theme === "light" ? <Moon size={18} strokeWidth={2.2} /> : <Sun size={18} strokeWidth={2.2} />}
+            </button>
             {currentUser ? (
-              <button className="button button-secondary" onClick={handleLogout} type="button">
+              <button className="button button-danger" onClick={handleLogout} type="button">
                 Log out
               </button>
             ) : (

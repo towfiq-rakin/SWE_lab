@@ -14,10 +14,22 @@ import NotFoundPage from "./pages/NotFoundPage";
 import RegisterPage from "./pages/RegisterPage";
 import WatchlistPage from "./pages/WatchlistPage";
 
+const THEME_STORAGE_KEY = "auction-studio-theme";
+
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [userError, setUserError] = useState("");
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") {
+      return "light";
+    }
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === "light" || savedTheme === "dark") {
+      return savedTheme;
+    }
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
 
   const loadCurrentUser = async () => {
     try {
@@ -35,6 +47,11 @@ export default function App() {
     loadCurrentUser();
   }, []);
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
   const handleAuthSuccess = (userPayload) => {
     setCurrentUser({
       authenticated: true,
@@ -48,10 +65,19 @@ export default function App() {
     setCurrentUser(null);
   };
 
+  const handleThemeToggle = () => {
+    setTheme((currentTheme) => (currentTheme === "light" ? "dark" : "light"));
+  };
+
   return (
     <div className="app-shell">
       <div className="app-backdrop" />
-      <Navbar currentUser={currentUser} onLoggedOut={handleLoggedOut} />
+      <Navbar
+        currentUser={currentUser}
+        onLoggedOut={handleLoggedOut}
+        onThemeToggle={handleThemeToggle}
+        theme={theme}
+      />
       <main className="page-shell">
         {loadingUser ? (
           <LoadingState title="Checking session" message="Preparing your account experience..." />
