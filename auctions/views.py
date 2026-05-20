@@ -1,10 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
-
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
 from .models import User, Auction, Bid, Comment
 
 
@@ -12,15 +13,15 @@ def index(request):
     category = request.GET.get("category")
     if category:
         if category == "None":
-             listings = Auction.objects.filter(isActive=True, category__isnull=True)
+            listings = Auction.objects.filter(isActive=True).filter(
+                Q(category__isnull=True) | Q(category="")
+            )
         else:
-             listings = Auction.objects.filter(isActive=True, category=category)
+            listings = Auction.objects.filter(isActive=True, category=category)
     else:
         listings = Auction.objects.filter(isActive=True)
-    
-    return render(request, "auctions/index.html", {
-        "listings": listings
-    })
+
+    return render(request, "auctions/index.html", {"listings": listings})
 
 
 def login_view(request):
@@ -82,15 +83,15 @@ def create_listing(request):
         description = request.POST["description"]
         start_price = request.POST["start_price"]
         image_url = request.POST["image_url"]
-        category = request.POST["category"]
+        category = request.POST["category"] or None
 
         listing = Auction(
             title=title,
             description=description,
             start_price=start_price,
-            image_url=image_url,
+            image_url=image_url or None,
             category=category,
-            owner=request.user
+            owner=request.user,
         )
         listing.save()
         return HttpResponseRedirect(reverse("index"))
@@ -107,7 +108,7 @@ def listing(request, listing_id):
     bids = Bid.objects.filter(auction=listing).order_by('-amount')
     highest_bid = bids.first()
     current_price = highest_bid.amount if highest_bid else listing.start_price
-    
+
     comments = Comment.objects.filter(auction=listing).order_by('-created_at')
 
     return render(request, "auctions/listing.html", {
@@ -126,7 +127,7 @@ def place_bid(request, listing_id):
     if request.method == "POST":
         listing = get_object_or_404(Auction, pk=listing_id)
         amount = float(request.POST["bid"])
-        
+
         bids = Bid.objects.filter(auction=listing).order_by('-amount')
         highest_bid = bids.first()
         current_price = highest_bid.amount if highest_bid else listing.start_price
@@ -137,7 +138,7 @@ def place_bid(request, listing_id):
         else:
             # Handle error (maybe pass error via session or context on redirect - keeping simple for now)
             pass
-            
+
         return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
     return HttpResponseRedirect(reverse("index"))
 
@@ -148,14 +149,14 @@ def close_auction(request, listing_id):
         listing = get_object_or_404(Auction, pk=listing_id)
         if request.user == listing.owner:
             listing.isActive = False
-            
+
             bids = Bid.objects.filter(auction=listing).order_by('-amount')
             highest_bid = bids.first()
             if highest_bid:
                 listing.winner = highest_bid.user
-            
+
             listing.save()
-            
+
         return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
     return HttpResponseRedirect(reverse("index"))
 
