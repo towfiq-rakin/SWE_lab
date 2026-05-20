@@ -408,7 +408,6 @@ img {
 .bookmark-chip {
   position: absolute;
   top: 1rem;
-  bottom: 1rem;
   left: 1rem;
   padding: 0.42rem 0.72rem;
   border-radius: 999px;
@@ -425,6 +424,11 @@ img {
 
 .bookmark-chip {
   position: static;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  line-height: 1;
+  white-space: nowrap;
   background: var(--accent-soft);
   color: var(--accent-dark);
 }
@@ -439,6 +443,7 @@ img {
 .listing-card__header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 1rem;
 }
 
@@ -655,6 +660,18 @@ img {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.76);
   color: var(--text);
+}
+
+:root[data-theme="dark"] .field input,
+:root[data-theme="dark"] .field textarea {
+  background: rgba(28, 22, 18, 0.9);
+  border-color: rgba(243, 223, 202, 0.18);
+  color: #f6eee6;
+}
+
+:root[data-theme="dark"] .field input::placeholder,
+:root[data-theme="dark"] .field textarea::placeholder {
+  color: rgba(214, 191, 169, 0.78);
 }
 
 .field input:focus,
